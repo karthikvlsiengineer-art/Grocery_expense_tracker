@@ -34,7 +34,6 @@ document.getElementById("totalExpense").innerText = total;
 
 }
 
-
 function deleteExpense(id){
 
 fetch(API + "/delete/" + id,{
@@ -43,7 +42,6 @@ method:"DELETE"
 .then(()=>loadExpenses());
 
 }
-
 
 document.getElementById("expenseForm").addEventListener("submit",function(e){
 
@@ -74,13 +72,11 @@ loadCharts();
 
 });
 
-
 function loadCharts(){
 
 fetch(API + "/chart-data")
 .then(res => res.json())
 .then(data => {
-
 
 new Chart(
 document.getElementById("pieChart"),
@@ -93,7 +89,6 @@ data:data.item_values
 }]
 }
 });
-
 
 new Chart(
 document.getElementById("barChart"),
@@ -111,7 +106,6 @@ data:data.month_values
 });
 
 }
-
 
 loadExpenses();
 loadCharts();
