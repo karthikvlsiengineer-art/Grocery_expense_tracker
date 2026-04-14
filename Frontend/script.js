@@ -1,3 +1,5 @@
+document.addEventListener("DOMContentLoaded", function () {
+
 const API = "https://grocery-expense-tracker.onrender.com";
 
 function loadExpenses(){
@@ -34,7 +36,7 @@ document.getElementById("totalExpense").innerText = total;
 
 }
 
-function deleteExpense(id){
+window.deleteExpense = function(id){
 
 fetch(API + "/delete/" + id,{
 method:"DELETE"
@@ -109,3 +111,5 @@ data:data.month_values
 
 loadExpenses();
 loadCharts();
+
+});
