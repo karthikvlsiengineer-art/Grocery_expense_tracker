@@ -1,7 +1,9 @@
-from flask import Flask, render_template, request, redirect, jsonify
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 import sqlite3
 
 app = Flask(__name__)
+CORS(app)
 
 
 def get_db():
@@ -26,42 +28,45 @@ def init_db():
     conn.close()
 
 
-@app.route("/", methods=["GET", "POST"])
-def index():
+# GET ALL EXPENSES
+@app.route("/expenses", methods=["GET"])
+def get_expenses():
 
     conn = get_db()
 
-    if request.method == "POST":
-        item = request.form["item"]
-        amount = request.form["amount"]
-        date = request.form["date"]
-
-        conn.execute(
-            "INSERT INTO expenses(item,amount,date) VALUES (?,?,?)",
-            (item, amount, date)
-        )
-
-        conn.commit()
-        return redirect("/")
-
     expenses = conn.execute("SELECT * FROM expenses").fetchall()
-
-    total = conn.execute("SELECT SUM(amount) FROM expenses").fetchone()[0]
-
-    if total is None:
-        total = 0
 
     conn.close()
 
-    return render_template(
-        "index.html",
-        expenses=expenses,
-        total=total
+    return jsonify([dict(e) for e in expenses])
+
+
+# ADD EXPENSE
+@app.route("/add-expense", methods=["POST"])
+def add_expense():
+
+    data = request.get_json()
+
+    item = data["item"]
+    amount = data["amount"]
+    date = data["date"]
+
+    conn = get_db()
+
+    conn.execute(
+        "INSERT INTO expenses(item,amount,date) VALUES (?,?,?)",
+        (item, amount, date)
     )
 
+    conn.commit()
+    conn.close()
 
-@app.route("/delete/<int:id>")
-def delete(id):
+    return jsonify({"message": "Expense added"})
+
+
+# DELETE EXPENSE
+@app.route("/delete/<int:id>", methods=["DELETE"])
+def delete_expense(id):
 
     conn = get_db()
 
@@ -73,15 +78,15 @@ def delete(id):
     conn.commit()
     conn.close()
 
-    return redirect("/")
+    return jsonify({"message": "Deleted"})
 
 
+# CHART DATA
 @app.route("/chart-data")
 def chart_data():
 
     conn = get_db()
 
-    # Pie Chart (Item vs Expense)
     items = conn.execute("""
         SELECT item, SUM(amount) as total
         FROM expenses
@@ -91,7 +96,6 @@ def chart_data():
     item_labels = [row["item"] for row in items]
     item_values = [row["total"] for row in items]
 
-    # Bar Chart (Monthly Expense)
     months = conn.execute("""
         SELECT strftime('%Y-%m', date) as month,
         SUM(amount) as total
