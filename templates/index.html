@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+
+    <title>Grocery Expense Tracker</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+
+<link rel="stylesheet" href="/static/style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+
+<h1>Grocery Expense Tracker</h1>
+
+
+<form method="POST">
+
+<input type="text" name="item" placeholder="Item" required>
+
+<input type="number" name="amount" placeholder="Amount" required>
+
+<input type="date" name="date" required>
+
+<button type="submit">Add Expense</button>
+
+</form>
+
+
+<h2>Total Expense: ₹{{total}}</h2>
+
+
+<h2>Expense List</h2>
+
+<table>
+
+<tr>
+<th>Item</th>
+<th>Amount</th>
+<th>Date</th>
+<th>Delete</th>
+</tr>
+
+{% for e in expenses %}
+
+<tr>
+
+<td>{{e.item}}</td>
+
+<td>₹{{e.amount}}</td>
+
+<td>{{e.date}}</td>
+
+<td>
+<a href="/delete/{{e.id}}">
+<button class="delete">Delete</button>
+</a>
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+
+<h2>Expense Charts</h2>
+
+
+<div class="charts">
+
+<div class="chart">
+<h3>Item Expense Distribution</h3>
+<canvas id="pieChart"></canvas>
+</div>
+
+
+<div class="chart">
+<h3>Monthly Expense</h3>
+<canvas id="barChart"></canvas>
+</div>
+
+</div>
+
+
+
+<script>
+
+fetch("/chart-data")
+.then(res => res.json())
+.then(data => {
+
+
+new Chart(
+document.getElementById("pieChart"),
+{
+type:'pie',
+data:{
+labels:data.item_labels,
+datasets:[{
+data:data.item_values
+}]
+}
+});
+
+
+new Chart(
+document.getElementById("barChart"),
+{
+type:'bar',
+data:{
+labels:data.month_labels,
+datasets:[{
+label:'Monthly Expense',
+data:data.month_values
+}]
+}
+});
+
+
+});
+
+</script>
+
+
+</body>
+
+</html>
