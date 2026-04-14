@@ -1,6 +1,44 @@
+const API = "https://grocery-expense-tracker.onrender.com";
+
 document.addEventListener("DOMContentLoaded", function () {
 
-const API = "https://grocery-expense-tracker.onrender.com";
+const form = document.getElementById("expenseForm");
+
+form.addEventListener("submit", function(e){
+
+e.preventDefault();
+
+let item = document.getElementById("item").value;
+let amount = document.getElementById("amount").value;
+let date = document.getElementById("date").value;
+
+fetch(API + "/add-expense",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+item:item,
+amount:amount,
+date:date
+})
+})
+.then(res => res.json())
+.then(data => {
+
+form.reset();
+loadExpenses();
+loadCharts();
+
+})
+.catch(err => console.log(err));
+
+});
+
+loadExpenses();
+loadCharts();
+
+});
 
 function loadExpenses(){
 
@@ -36,7 +74,7 @@ document.getElementById("totalExpense").innerText = total;
 
 }
 
-window.deleteExpense = function(id){
+function deleteExpense(id){
 
 fetch(API + "/delete/" + id,{
 method:"DELETE"
@@ -44,35 +82,6 @@ method:"DELETE"
 .then(()=>loadExpenses());
 
 }
-
-document.getElementById("expenseForm").addEventListener("submit",function(e){
-
-e.preventDefault();
-
-let item = document.getElementById("item").value;
-let amount = document.getElementById("amount").value;
-let date = document.getElementById("date").value;
-
-fetch(API + "/add-expense",{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-item:item,
-amount:amount,
-date:date
-})
-})
-.then(()=>{
-
-document.getElementById("expenseForm").reset();
-loadExpenses();
-loadCharts();
-
-});
-
-});
 
 function loadCharts(){
 
@@ -108,8 +117,3 @@ data:data.month_values
 });
 
 }
-
-loadExpenses();
-loadCharts();
-
-});
